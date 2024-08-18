@@ -19,19 +19,19 @@ export async function sendVerificationEMail(
 		} as SMTPTransport.Options);
 
 		const mailOptions = {
-			from: "Trip Unite",
+			from: "Travel Link",
 			to: email,
-			subject: "Trip Unite - Verification Code",
+			subject: "Travel Link - Verification Code",
 			text: `Hello,
 		
-		Thank you for joining Trip Unite! To complete your registration, please verify your email address by using the following verification code:
+Thank you for joining Travel Link! To complete your registration, please verify your email address by using the following verification code:
 		
-		${verifyToken}
+${verifyToken}
 		
-		If you did not sign up for Trip Unite, please disregard this email.
+If you did not sign up for Travel Link, please disregard this email.
 		
-		Safe travels,
-		The Trip Unite Team`,
+Safe travels,
+The Travel Link Team`,
 		};
 
 		transporter.sendMail(mailOptions, function (err, data) {
