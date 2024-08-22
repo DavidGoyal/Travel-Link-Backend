@@ -44,6 +44,20 @@ export const registerUser = TryCatch(
 			return next(new ErrorHandler(400, "Please enter all fields"));
 		}
 
+		const birthDate = new Date(dob);
+		let age = new Date().getFullYear() - birthDate.getFullYear();
+		const monthDifference = new Date().getMonth() - birthDate.getMonth();
+		if (
+			monthDifference < 0 ||
+			(monthDifference === 0 && new Date().getDate() < birthDate.getDate())
+		) {
+			age--;
+		}
+
+		if (age < 10) {
+			return next(new ErrorHandler(400, "User must be at least 10 years old"));
+		}
+
 		if (!photo) {
 			return next(new ErrorHandler(400, "Please upload a photo"));
 		}
@@ -63,7 +77,7 @@ export const registerUser = TryCatch(
 		const verifyToken = Math.floor(Math.random() * 100000)
 			.toString()
 			.padStart(5, "0");
-		const verifyTokenExpiry = new Date(Date.now() + 60 * 60 * 10);
+		const verifyTokenExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
 		const hashedPasssword = await hash(password, 10);
 
