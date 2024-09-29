@@ -184,7 +184,12 @@ export const logoutUser = TryCatch(
 	async (req: Request, res: Response, next: NextFunction) => {
 		res
 			.status(200)
-			.clearCookie("tripunitetoken")
+			.cookie("tripunitetoken", null, {
+				maxAge: 0,
+				httpOnly: true,
+				secure: true,
+				sameSite: "none",
+			})
 			.json({ success: true, message: "User logged out successfully" });
 	}
 );
