@@ -13,6 +13,7 @@ export type RegisterUser = {
 export type LoginUser = {
 	email: string;
 	password: string;
+	cloudflareToken: string;
 };
 
 export type VerifyUser = {

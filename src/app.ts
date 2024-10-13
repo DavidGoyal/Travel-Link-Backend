@@ -25,6 +25,7 @@ import messageRoutes from "./routes/messageRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { AuthenticatedSocket } from "./types/types.js";
+import { rateLimit } from "express-rate-limit";
 
 dotenv.config({ path: "./.env" });
 
@@ -72,6 +73,17 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 
 connectDB();
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 1000, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+	// store: ... , // Redis, Memcached, etc. See below.
+});
+
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
 
 app.get("/", (req, res) => {
 	res.send("Hello, World!");

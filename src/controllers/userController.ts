@@ -123,10 +123,25 @@ export const loginUser = TryCatch(
 		res: Response,
 		next: NextFunction
 	) => {
-		const { email, password } = req.body;
+		const { email, password, cloudflareToken } = req.body;
 
 		if (!email || !password) {
 			return next(new ErrorHandler(400, "Please enter all fields"));
+		}
+
+		let formData = new FormData();
+		formData.append("secret", process.env.SECRET_KEY as string);
+		formData.append("response", cloudflareToken);
+
+		const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+		const result = await fetch(url, {
+			body: formData,
+			method: "POST",
+		});
+		const challengeSucceeded = (await result.json()).success;
+
+		if (!challengeSucceeded) {
+			return next(new ErrorHandler(403, "Invalid reCAPTCHA token"));
 		}
 
 		const user = await User.findOne({ email, isVerified: true }).select(
