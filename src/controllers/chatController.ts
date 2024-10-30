@@ -40,15 +40,31 @@ export const getAllChats = TryCatch(
 
 export const getChatDetails = TryCatch(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const chat = await Chat.findById(req.params.id);
+		const chat = await Chat.findById(req.params.id).populate(
+			"members",
+			"name avatar"
+		);
 
 		if (!chat) {
 			return next(new ErrorHandler(404, "Chat does not exists"));
 		}
 
+		const otherMembers = chat.members.filter(
+			(member: {
+				_id: string;
+				name: string;
+				avatar: { _id: string; url: string };
+			}) => member._id.toString() !== req.user!.toString()
+		);
+
 		res.status(200).json({
 			success: true,
-			chat,
+			chat: {
+				_id: chat._id,
+				name: otherMembers[0].name,
+				avatar: [otherMembers[0].avatar.url],
+				members: [chat.members[0]._id, chat.members[1]._id],
+			},
 		});
 	}
 );

@@ -23,9 +23,14 @@ export const emitEvent = (
 };
 
 export const getSocketIDs = (users: string[]) => {
-	const socketIds = users.map((user) => userSocketIds.get(user.toString()));
+	try {
+		const socketIds = users.map((user) => userSocketIds.get(user.toString()));
 
-	return socketIds;
+		return socketIds;
+	} catch (error) {
+		console.log(error);
+		return [];
+	}
 };
 
 export const uploadFilesToCloudinary = async (files = []) => {

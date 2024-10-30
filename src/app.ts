@@ -8,11 +8,18 @@ import morgan from "morgan";
 import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
 import {
+	ANSWER,
+	ICE_CANDIDATE,
+	INIT_VIDEO_CALL,
 	NEW_MESSAGE,
 	NEW_MESSAGE_ALERT,
+	OFFER,
 	ONLINE_USERS,
+	SEND_OFFER,
 	START_TYPING,
+	START_VIDEO_CALL,
 	STOP_TYPING,
+	STOP_VIDEO_CALL,
 } from "./constants/events.js";
 import { getSocketIDs } from "./lib/helper.js";
 import { socketAuthenticator } from "./middlewares/auth.js";
@@ -165,6 +172,39 @@ io.on("connection", (socket: AuthenticatedSocket) => {
 
 	socket.on(ONLINE_USERS, () => {
 		socket.emit(ONLINE_USERS, Array.from(onlineUsers));
+	});
+
+	socket.on(START_VIDEO_CALL, ({ members, chatId }) => {
+		const membersSocketIds = getSocketIDs(members);
+		socket
+			.to(membersSocketIds)
+			.emit(START_VIDEO_CALL, { name: user.name, callChatId: chatId });
+	});
+
+	socket.on(STOP_VIDEO_CALL, ({ members }) => {
+		const membersSocketIds = getSocketIDs(members);
+		socket.to(membersSocketIds).emit(STOP_VIDEO_CALL);
+	});
+
+	socket.on(INIT_VIDEO_CALL, ({ members }) => {
+		const membersSocketIds = getSocketIDs(members);
+		io.to(membersSocketIds).emit(SEND_OFFER);
+	});
+
+	socket.on(OFFER, ({ offer, members }) => {
+		const membersSocketIds = getSocketIDs(members);
+		io.to(membersSocketIds).emit(OFFER, { offer });
+	});
+
+	socket.on(ANSWER, ({ answer, members }) => {
+		const membersSocketIds = getSocketIDs(members);
+		io.to(membersSocketIds).emit(ANSWER, { answer });
+	});
+
+	socket.on(ICE_CANDIDATE, ({ candidate, members, type }) => {
+		const membersSocketIds = getSocketIDs(members);
+
+		io.to(membersSocketIds).emit(ICE_CANDIDATE, { candidate, type });
 	});
 
 	socket.on("disconnect", () => {
